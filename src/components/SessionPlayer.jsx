@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PATTERNS, getCurrentPhase, getInterpolatedFrequency, formatDuration, getPackDuration } from '../packs';
 
-export default function SessionPlayer({ pack, onExit }) {
+export default function SessionPlayer({ pack, onExit, onComplete }) {
   const [state, setState] = useState('playing'); // 'playing' | 'paused' | 'ending' | 'ended'
   const [elapsed, setElapsed] = useState(0);
   const [intensity, setIntensity] = useState(0);
   const [showUI, setShowUI] = useState(true);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkTime, setBookmarkTime] = useState(null);
   
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -28,27 +30,45 @@ export default function SessionPlayer({ pack, onExit }) {
   const calculateIntensity = useCallback((time, freq, phaseInfo) => {
     const { phase, phaseElapsed } = phaseInfo;
     
+    // Primary flicker wave at target frequency
     const primary = Math.sin(2 * Math.PI * freq * time);
-    const harmonic1 = 0.2 * Math.sin(2 * Math.PI * (freq * 2) * time);
-    const harmonic2 = 0.15 * Math.sin(2 * Math.PI * (freq * 0.5) * time);
     
+    // TODO: GUARDRAIL - Harmonics add richness, multipliers control their strength
+    // 0.3 = 30% amplitude of primary for 2nd harmonic (double frequency)
+    // 0.2 = 20% amplitude for sub-harmonic (half frequency)
+    const harmonic1 = 0.3 * Math.sin(2 * Math.PI * (freq * 2) * time);
+    const harmonic2 = 0.2 * Math.sin(2 * Math.PI * (freq * 0.5) * time);
+    
+    // Combine waves: range is roughly -1.5 to +1.5
     const combined = primary + harmonic1 + harmonic2;
-    const normalized = (combined + 1.4) / 2.8;
-    const curved = Math.pow(normalized, 2.2);
     
+    // TODO: GUARDRAIL REMOVED - was normalizing to 0-1, now using sharper curve
+    // Normalize to 0-1 range (1.5 is max amplitude with harmonics)
+    const normalized = (combined + 1.5) / 3.0;
+    
+    // TODO: GUARDRAIL - Power curve sharpens transitions (higher = more abrupt)
+    // 1.0 = linear, 2.0 = moderate sharpening, 3.0+ = very sharp on/off
+    const curved = Math.pow(Math.max(0, Math.min(1, normalized)), 1.8);
+    
+    // Apply phase intensity setting
     let intensityMultiplier = phase.intensity;
     
+    // Ramp in (fade from 0)
     if (phaseElapsed < phase.rampIn) {
       intensityMultiplier *= phaseElapsed / phase.rampIn;
     }
     
+    // TODO: GUARDRAIL REMOVED - ramp out no longer reduces by only 30%
+    // Now does full fade during ramp out period
     const rampOutStart = phase.duration - phase.rampOut;
     if (phaseElapsed > rampOutStart) {
       const rampProgress = (phaseElapsed - rampOutStart) / phase.rampOut;
-      intensityMultiplier *= 1 - (rampProgress * 0.3);
+      intensityMultiplier *= 1 - rampProgress;
     }
     
-    return 0.15 + (curved * 0.75 * intensityMultiplier);
+    // TODO: GUARDRAIL REMOVED - was 0.15 floor + 0.75 range (max 0.9)
+    // Now: 0.0 floor + 1.0 range (full black to full white)
+    return curved * intensityMultiplier;
   }, []);
   
   // Draw patterns
@@ -282,8 +302,18 @@ export default function SessionPlayer({ pack, onExit }) {
   
   // Exit when ended
   useEffect(() => {
-    if (state === 'ended') onExit();
-  }, [state, onExit]);
+    if (state === 'ended') {
+      if (onComplete) {
+        onComplete({
+          duration: elapsed,
+          bookmarked,
+          bookmarkTime,
+        });
+      } else {
+        onExit();
+      }
+    }
+  }, [state, elapsed, bookmarked, bookmarkTime, onExit, onComplete]);
   
   // Keyboard
   useEffect(() => {
@@ -401,9 +431,35 @@ export default function SessionPlayer({ pack, onExit }) {
             <span style={{ fontSize: '22px' }}>{pack.icon}</span>
             <span style={{ fontSize: '15px', fontWeight: '600', color: '#fff' }}>{pack.name}</span>
           </div>
-          <span style={{ fontSize: '14px', color: '#888' }}>
-            {formatDuration(elapsed)} / {formatDuration(totalDuration)}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!bookmarked) {
+                  setBookmarked(true);
+                  setBookmarkTime(elapsed);
+                }
+              }}
+              style={{
+                background: bookmarked ? 'rgba(255, 200, 100, 0.2)' : 'rgba(255,255,255,0.1)',
+                border: bookmarked ? '1px solid rgba(255, 200, 100, 0.5)' : '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                color: bookmarked ? '#ffb864' : '#fff',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              🔖 {bookmarked ? 'Saved' : 'Remember'}
+            </button>
+            <span style={{ fontSize: '14px', color: '#888' }}>
+              {formatDuration(elapsed)} / {formatDuration(totalDuration)}
+            </span>
+          </div>
         </div>
         
         {/* Phase dots */}

@@ -1,0 +1,16 @@
+{
+  "appId": "com.flicker.neural",
+  "appName": "Flicker",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "KeepAwake": {
+      "enabled": true
+    }
+  }
+}

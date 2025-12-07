@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Flicker</string>
+    <string name="title_activity_main">Flicker</string>
+    <string name="package_name">com.flicker.neural</string>
+    <string name="custom_url_scheme">com.flicker.neural</string>
+</resources>
