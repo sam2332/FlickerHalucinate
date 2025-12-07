@@ -11,6 +11,11 @@
   "plugins": {
     "KeepAwake": {
       "enabled": true
+    },
+    "StatusBar": {
+      "style": "Dark",
+      "backgroundColor": "#000000",
+      "overlaysWebView": true
     }
   }
 }

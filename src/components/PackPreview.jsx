@@ -193,7 +193,7 @@ export default function PackPreview({ pack, onAccept, onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-900 text-white p-6 overflow-y-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -213,6 +213,174 @@ export default function PackPreview({ pack, onAccept, onBack }) {
                 <span>⏱️ {Math.floor(pack.duration / 60)}m {pack.duration % 60}s</span>
                 <span>📊 {pack.difficulty}</span>
                 <span>🎭 {pack.phases.length} phases</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Intensity Graph */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Session Intensity Profile</h2>
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <svg width="100%" height="300" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
+              {/* Background grid */}
+              <defs>
+                <linearGradient id="intensityGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+              
+              {/* Grid lines */}
+              {[0, 0.25, 0.5, 0.75, 1].map((y) => (
+                <line
+                  key={y}
+                  x1="50"
+                  y1={250 - y * 200}
+                  x2="950"
+                  y2={250 - y * 200}
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="1"
+                />
+              ))}
+              
+              {/* Y-axis labels */}
+              {[0, 25, 50, 75, 100].map((label, i) => (
+                <text
+                  key={label}
+                  x="40"
+                  y={254 - i * 50}
+                  fill="#666"
+                  fontSize="12"
+                  textAnchor="end"
+                >
+                  {label}%
+                </text>
+              ))}
+              
+              {/* Build intensity curve */}
+              {(() => {
+                const totalDuration = pack.phases.reduce((sum, p) => sum + p.duration, 0);
+                const points = [];
+                let accumulated = 0;
+                
+                pack.phases.forEach((phase, index) => {
+                  const startX = 50 + (accumulated / totalDuration) * 900;
+                  const endX = 50 + ((accumulated + phase.duration) / totalDuration) * 900;
+                  const startY = 250 - (index === 0 ? 0 : pack.phases[index - 1].intensity) * 200;
+                  const peakY = 250 - phase.intensity * 200;
+                  
+                  // Ramp in
+                  const rampInX = startX + (phase.rampIn / totalDuration) * 900;
+                  points.push(`${startX},${startY}`);
+                  points.push(`${rampInX},${peakY}`);
+                  
+                  // Sustain
+                  const rampOutStartX = endX - (phase.rampOut / totalDuration) * 900;
+                  points.push(`${rampOutStartX},${peakY}`);
+                  
+                  // Ramp out (to next phase start)
+                  const nextIntensity = index < pack.phases.length - 1 ? pack.phases[index + 1].intensity : 0;
+                  const nextY = 250 - nextIntensity * 200;
+                  points.push(`${endX},${nextY}`);
+                  
+                  accumulated += phase.duration;
+                });
+                
+                // Create filled area
+                const pathData = `M ${points.join(' L ')} L 950,250 L 50,250 Z`;
+                const lineData = `M ${points.join(' L ')}`;
+                
+                return (
+                  <>
+                    {/* Fill under curve */}
+                    <path
+                      d={pathData}
+                      fill="url(#intensityGradient)"
+                    />
+                    {/* Curve line */}
+                    <path
+                      d={lineData}
+                      fill="none"
+                      stroke="#60a5fa"
+                      strokeWidth="3"
+                      strokeLinejoin="round"
+                    />
+                  </>
+                );
+              })()}
+              
+              {/* Phase separators and labels */}
+              {(() => {
+                const totalDuration = pack.phases.reduce((sum, p) => sum + p.duration, 0);
+                let accumulated = 0;
+                
+                return pack.phases.map((phase, index) => {
+                  const x = 50 + (accumulated / totalDuration) * 900;
+                  accumulated += phase.duration;
+                  
+                  return (
+                    <g key={index}>
+                      {/* Vertical separator line */}
+                      <line
+                        x1={x}
+                        y1="50"
+                        x2={x}
+                        y2="250"
+                        stroke="rgba(255,255,255,0.2)"
+                        strokeWidth="1"
+                        strokeDasharray="4,4"
+                      />
+                      {/* Phase label */}
+                      <text
+                        x={x + 10}
+                        y="30"
+                        fill="#888"
+                        fontSize="11"
+                        fontWeight="500"
+                      >
+                        {phase.name}
+                      </text>
+                      {/* Frequency label */}
+                      <text
+                        x={x + 10}
+                        y="45"
+                        fill="#60a5fa"
+                        fontSize="10"
+                      >
+                        {phase.frequency}Hz
+                      </text>
+                    </g>
+                  );
+                });
+              })()}
+              
+              {/* Axes */}
+              <line x1="50" y1="250" x2="950" y2="250" stroke="#666" strokeWidth="2" />
+              <line x1="50" y1="50" x2="50" y2="250" stroke="#666" strokeWidth="2" />
+              
+              {/* Axis labels */}
+              <text x="500" y="285" fill="#888" fontSize="13" textAnchor="middle" fontWeight="500">
+                Time →
+              </text>
+              <text x="15" y="150" fill="#888" fontSize="13" textAnchor="middle" transform="rotate(-90, 15, 150)" fontWeight="500">
+                Intensity
+              </text>
+            </svg>
+            
+            {/* Legend */}
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-400">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                <span>Peak Intensity</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5 bg-blue-400"></div>
+                <span>Ramp In/Out</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5 border-t border-dashed border-gray-400"></div>
+                <span>Phase Transitions</span>
               </div>
             </div>
           </div>
@@ -264,7 +432,7 @@ export default function PackPreview({ pack, onAccept, onBack }) {
 
           {/* Phase Details */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Session Timeline</h2>
+            <h2 className="text-xl font-semibold mb-4">Phase Details</h2>
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
               {pack.phases.map((phase, index) => (
                 <div

@@ -12,6 +12,8 @@ export default function SeizureWarning({ onAccept }) {
       justifyContent: 'center',
       padding: '20px',
       fontFamily: 'system-ui, -apple-system, sans-serif',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
     }}>
       <div style={{
         maxWidth: '460px',
