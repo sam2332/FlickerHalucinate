@@ -2,198 +2,231 @@
 
 ## Project Overview
 
-Flicker is a **photic stimulation app** for neural entrainment via rhythmic light patterns. It uses specific flicker frequencies (4-15 Hz) to synchronize with brainwave patterns, creating visual phenomena and altered states. Built as a React web app wrapped in **Capacitor** for Android deployment.
+Photic stimulation app using rhythmic light (4-15 Hz) to synchronize brainwaves and create visual phenomena. React 19 + Vite 7 web app wrapped in **Capacitor 7** for Android.
 
-**Core Concept**: Rhythmic flashing at alpha/theta frequencies (8-13 Hz) can entrain brainwaves, producing visual hallucinations (geometric patterns, colors, kaleidoscopic effects) with eyes closed. This is based on the "flicker frequency response" - the visual cortex responds to specific frequencies.
+**Core Concept**: Alpha/theta frequencies (8-13 Hz) produce visual hallucinations with eyes closed via "flicker frequency response."
 
 ## Architecture
 
-### Screen Flow (State Machine)
-The app follows a linear flow managed in [src/App.jsx](src/App.jsx):
+### Screen Flow (State Machine in [src/App.jsx](src/App.jsx))
 ```
-SPLASH → WARNING → PACKS → PREVIEW → SESSION → REVIEW → (loop back to PACKS)
+SPLASH → WARNING → PACKS → PREVIEW → SESSION → REVIEW → (loop)
 ```
 
-- **SPLASH**: Animated intro with branding
-- **WARNING**: Critical seizure/safety warnings (must accept to proceed)
-- **PACKS**: Browse and select experience packs
-- **PREVIEW**: Shows pack details, pattern visualizations, phase timeline, and requires user acceptance before starting
-- **SESSION**: Full-screen flicker playback with multi-phase progression
-- **REVIEW**: Rate experience and save session data
+Simple `useState` manages flow - no Redux/Context needed.
 
-State is managed with simple `useState` - no Redux/Context needed for this linear flow.
+### Key Files
+- **[src/components/SessionPlayer.jsx](src/components/SessionPlayer.jsx)**: Core engine - Canvas rendering, intensity calculation (sine waves + harmonics), phase transitions
+- **[src/packs.js](src/packs.js)**: Experience pack definitions with phases (`frequency`, `duration`, `pattern`, `intensity`, `jitter`, `rampIn`, `rampOut`)
+- **[src/components/preview/](src/components/preview/)**: Modular preview components (IntensityGraph, PatternPreview, PhaseCards)
 
-### Key Components
+### Pattern System (8 patterns in SessionPlayer)
+`UNIFORM` | `RADIAL` | `SPIRAL` | `TUNNEL` | `CHECKERBOARD` | `CONCENTRIC` | `STARBURST` | `VORTEX`
 
-- [src/components/SessionPlayer.jsx](src/components/SessionPlayer.jsx): The core engine. Renders Canvas with animated patterns, calculates intensity using sine waves + harmonics, manages phase transitions with ramp-in/ramp-out
-- [src/packs.js](src/packs.js): Data file defining all experience packs. Each pack contains phases with `frequency`, `duration`, `pattern`, `intensity`, `jitter` parameters
-- [src/components/PackSelection.jsx](src/components/PackSelection.jsx): Pack browser with difficulty filtering
-- [src/components/PackPreview.jsx](src/components/PackPreview.jsx): Preview screen showing animated pattern demos, phase timeline, and acceptance requirement before session starts
-- [src/components/SeizureWarning.jsx](src/components/SeizureWarning.jsx): Legal/safety screen (persists acceptance to sessionStorage)
+## Safety Constraints (CRITICAL)
 
-### Pattern System
+### Frequency Limits
+- **Safe range**: 5-15 Hz (alpha/theta bands)
+- **DANGER ZONE**: 15-25 Hz triggers photosensitive epilepsy - **NEVER exceed 15 Hz**
+- Best entrainment: 8-13 Hz (alpha band)
 
-8 visual patterns implemented as canvas drawing functions in SessionPlayer:
-- `UNIFORM`: Solid flashing screen (baseline)
-- `RADIAL`: Concentric waves from center
-- `SPIRAL`: Rotating spiral
-- `TUNNEL`: 3D tunnel effect (most intense)
-- `CHECKERBOARD`, `CONCENTRIC`, `STARBURST`, `VORTEX`: Geometric variations
-
-Patterns are selected per-phase in [src/packs.js](src/packs.js).
-
-## Critical Science & Safety Concepts
-
-### Frequency Bands (Brainwave Entrainment)
-Defined in `FREQUENCY_BANDS` ([src/packs.js](src/packs.js)):
-- **4-8 Hz (Theta)**: Deep meditation, drowsiness
-- **8-10 Hz (Low Alpha)**: Relaxed awareness ← **MOST EFFECTIVE** for photic driving
-- **10-13 Hz (High Alpha)**: Calm focus, peak visual entrainment
-- **13-15 Hz (Low Beta)**: Active focus
-- **15-25 Hz**: **DANGER ZONE** - photosensitive epilepsy trigger range ← **AVOID**
-
-**Current guardrail**: Frequencies stay 5-15 Hz (mostly alpha band). Advanced packs push toward 14-15 Hz but stay below 16 Hz.
-
-### Intensity Calculation
-In SessionPlayer's `calculateIntensity()`:
+### Intensity System
 ```javascript
-// Primary sine wave at target frequency
+// calculateIntensity() in SessionPlayer - sine wave + harmonics
 const primary = Math.sin(2 * Math.PI * freq * time);
-
-// Harmonics add organic complexity
-const harmonic1 = 0.3 * Math.sin(2 * Math.PI * (freq * 2) * time);     // 2nd harmonic
-const harmonic2 = 0.2 * Math.sin(2 * Math.PI * (freq * 0.5) * time);   // sub-harmonic
-
-// Combine, curve, and apply phase intensity multiplier
+const harmonic1 = 0.3 * Math.sin(2 * Math.PI * (freq * 2) * time);
+const harmonic2 = 0.2 * Math.sin(2 * Math.PI * (freq * 0.5) * time);
 ```
 
-**Removed guardrail**: Old code capped intensity at 0.85. Now allows full 1.0 for advanced packs (marked with `TODO: GUARDRAIL REMOVED` comments).
+### Ramp Guards
+- **Minimum 3s ramp-in/ramp-out** prevents seizure-triggering sudden transitions
+- Enforced in `createPhase()` defaults in [src/packs.js](src/packs.js)
 
-### Ramp-In/Ramp-Out
-Prevents jarring transitions that could trigger discomfort/seizures. Every phase has:
-- `rampIn`: Seconds to fade in (minimum 3s enforced)
-- `rampOut`: Seconds to fade out (minimum 3s enforced)
+## Build & Deploy
 
-Implemented as linear interpolation in SessionPlayer.
-
-### Jitter Parameter
-Adds random frequency variation: `jitter: 0.3` = ±0.15 Hz wobble. Makes experience feel more organic, prevents monotonous exact frequencies. Higher jitter = more chaotic/intense.
-
-## Build & Deployment Workflow
-
-### Development
 ```bash
-npm run dev          # Vite dev server on localhost:5173
+npm run dev          # Vite dev server :5173
 npm run build        # Production build to /dist
-npm test            # Run vitest tests
+npm test             # Vitest tests
 ```
 
-### Android Build (Capacitor)
-Use **[Build.bat](Build.bat)** script (Windows):
-1. Runs `npm run build` (Vite compile)
-2. Runs `npx cap sync` (copies dist/ to android/app/src/main/assets/)
-3. Launches Android Studio via `Launch_Android_Studio.bat`
-
-**Manual alternative**:
+### Android (Capacitor)
 ```bash
-npm run build
-npx cap sync
-npx cap open android  # Opens Android Studio
+npm run build && npx cap sync && npx cap open android
+# Or use Build.bat on Windows
 ```
 
-Capacitor config: [capacitor.config.json](capacitor.config.json)
-- AppId: `com.flicker.neural`
-- Uses KeepAwake plugin to prevent screen dimming during sessions
-
-### Android Project Structure
-- [android/](android/): Full Gradle Android project
-- [android/app/src/main/](android/app/src/main/): Android manifest, resources
-- Built web assets copied to `android/app/src/main/assets/public/`
+**CRITICAL**: Always run `npx cap sync` after web code changes before Android testing.
 
 ## Code Conventions
 
-### Styling
-- **Tailwind CSS** via PostCSS 4 (see [tailwind.config.js](tailwind.config.js))
-- Dark theme throughout (`bg-gray-900`, `text-white`)
-- Inline styles for animations in SplashScreen/SessionPlayer (dynamic values need JS)
+- **Tailwind CSS 4** via PostCSS, dark theme (`bg-gray-900`, `text-white`)
+- **Pure React hooks** - no global state library
+- **LocalStorage** for session history
+- **Inline styles** for dynamic canvas animations
 
-### State Management
-- **No global state library** - pure React `useState`/`useEffect`
-- Session data passed via props through the screen flow
-- LocalStorage for session history (in PackSelection/SessionReview)
-
-### Testing
-- **Vitest** for unit tests ([src/__tests__/flicker.test.js](src/__tests__/flicker.test.js))
-- Tests verify frequency band boundaries, phase calculations, pack structure
-- Many `TODO:` comments documenting guardrails and scientific reasoning
-
-### TODO Comments
-Extensive use of `TODO:` markers for documentation (NOT tasks):
+### TODO Comments = Documentation
 ```javascript
-// TODO: GUARDRAIL REMOVED - intensity was capped at 0.85, now full 1.0
-// TODO: Higher alpha for alertness
+// TODO: GUARDRAIL - intensity was capped at 0.85, now full 1.0
 // TODO: Theta for deep states
 ```
-These document **design decisions** and **safety considerations**. Don't remove them.
+These document **design decisions** - don't remove them.
 
-## Adding New Experience Packs
+## Adding Experience Packs
 
-Edit [src/packs.js](src/packs.js) → `EXPERIENCE_PACKS` array:
-
+Edit [src/packs.js](src/packs.js):
 ```javascript
-{
-  id: 'my-pack',
-  name: 'My Pack',
-  description: 'Pack description shown in UI',
-  duration: 300,  // Total seconds (calculated from phases)
-  difficulty: 'intermediate',  // 'beginner' | 'intermediate' | 'advanced'
-  icon: '🌀',
-  color: 'from-purple-500 to-pink-600',  // Tailwind gradient classes
-  phases: [
-    createPhase({
-      name: 'Phase 1',
-      duration: 60,
-      frequency: 10,       // Hz
-      pattern: PATTERNS.UNIFORM,
-      intensity: 0.8,      // 0-1
-      jitter: 0.1,         // Hz variation
-      rampIn: 5,           // Fade in seconds
-      rampOut: 5           // Fade out seconds
-    }),
-    // ... more phases
-  ]
+createPhase({
+  name: 'Phase 1',
+  duration: 60,        // seconds
+  frequency: 10,       // Hz (keep 5-15)
+  pattern: PATTERNS.UNIFORM,
+  intensity: 0.8,      // 0-1
+  jitter: 0.1,         // Hz variation
+  rampIn: 5,           // fade-in seconds
+  rampOut: 5           // fade-out seconds
+})
+```
+
+## TypeScript Migration Guide
+
+This project is JavaScript (React 19) but designed for easy TypeScript migration.
+
+### Recommended Steps
+1. Add TypeScript: `npm install -D typescript @types/react @types/react-dom`
+2. Create `tsconfig.json` with `"jsx": "react-jsx"`, `"strict": true`
+3. Rename files `.jsx` → `.tsx`, `.js` → `.ts`
+4. Add types incrementally (see interfaces below)
+
+### Key Interfaces to Create
+```typescript
+// types/pack.ts
+interface Phase {
+  name: string;
+  duration: number;      // seconds
+  frequency: number;     // Hz (5-15 safe range)
+  pattern: Pattern;
+  intensity: number;     // 0-1
+  jitter: number;        // Hz variation
+  rampIn: number;        // seconds
+  rampOut: number;       // seconds
+  description?: string;
+}
+
+interface ExperiencePack {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  icon: string;
+  color: string;         // Tailwind gradient classes
+  phases: Phase[];
+  isRandom?: boolean;
+}
+
+type Pattern = 'uniform' | 'radial' | 'spiral' | 'tunnel' | 
+               'checkerboard' | 'concentric' | 'starburst' | 'vortex';
+
+// types/session.ts
+interface SessionData {
+  duration: number;
+  bookmarked: boolean;
+  bookmarkTime: number | null;
+}
+
+interface PhaseInfo {
+  phase: Phase;
+  phaseIndex: number;
+  phaseElapsed: number;
+  phaseProgress: number;  // 0-1
+  totalPhases: number;
+}
+
+// types/review.ts
+interface SessionReview {
+  id: number;
+  packId: string;
+  packName: string;
+  rating: number;         // 1-5
+  intensity: number;      // 1-5 (visual intensity)
+  notes: string;
+  duration: number;
+  timestamp: string;
+  bookmarked: boolean;
+  bookmarkTime: number | null;
 }
 ```
 
-**Guidelines**:
-- Start gentle (8-10 Hz, intensity 0.7), build up gradually
-- Use rampIn/rampOut ≥ 3s to prevent jarring transitions
-- Keep frequencies 5-15 Hz (avoid 15-25 Hz seizure zone)
-- Advanced packs can use intensity 1.0 and jitter 0.3-0.5
-- Test with eyes closed in dim lighting for accuracy
+### Component Props Patterns
+```typescript
+// Screen components receive callbacks for state transitions
+interface PackSelectionProps {
+  onSelectPack: (pack: ExperiencePack) => void;
+}
 
-## External Dependencies
+interface SessionPlayerProps {
+  pack: ExperiencePack;
+  onExit: () => void;
+  onComplete: (data: SessionData) => void;
+}
 
-- **React 19** + **Vite 7** (modern fast build)
-- **Capacitor 7** (web-to-native wrapper)
-- **Tailwind CSS 4** (via PostCSS)
-- **Vitest** (testing)
+// Preview subcomponents are display-only or have simple handlers
+interface IntensityGraphProps {
+  phases: Phase[];
+}
 
-No UI component libraries - all components custom-built with Tailwind.
+interface PatternPreviewProps {
+  patterns: Pattern[];
+  currentIndex: number;
+  onPrev: () => void;
+  onNext: () => void;
+}
+```
+
+### Modular Architecture Best Practices
+When componentizing:
+
+1. **Extract domain types first** → Create `src/types/` folder with shared interfaces
+2. **Colocate component types** → Put component-specific types in the same file
+3. **Use barrel exports** → `src/types/index.ts` re-exports all types
+4. **Prefer interfaces over types** for object shapes (better error messages, extendable)
+5. **Discriminated unions** for Pattern type enables exhaustive switch checking
+
+### File Organization (Recommended)
+```
+src/
+  types/
+    index.ts          # barrel export
+    pack.ts           # Phase, ExperiencePack, Pattern
+    session.ts        # SessionData, PhaseInfo
+    review.ts         # SessionReview
+  hooks/
+    usePhaseCalculation.ts   # extract from SessionPlayer
+    useSessionTimer.ts       # extract timing logic
+  utils/
+    intensity.ts      # calculateIntensity, easeInOutCubic
+    format.ts         # formatTime, etc.
+  components/
+    session/          # SessionPlayer + subcomponents
+    preview/          # existing preview folder
+```
+
+### Canvas Typing
+```typescript
+// SessionPlayer canvas refs
+const canvasRef = useRef<HTMLCanvasElement>(null);
+const animationRef = useRef<number>(0);
+
+// Context typing
+const ctx = canvasRef.current?.getContext('2d');
+if (!ctx) return;
+```
 
 ## Common Pitfalls
 
-1. **Capacitor sync**: After editing web code, MUST run `npx cap sync` to copy changes to Android project
-2. **Frequency limits**: Never exceed 15 Hz without explicit safety review
-3. **Canvas performance**: SessionPlayer renders at 60fps - avoid heavy calculations in draw loops
-4. **Ramp times**: Forgetting rampIn/rampOut causes jarring starts/stops
-5. **Android testing**: Test on real device - emulator may not accurately represent flicker perception
-
-## File Navigation Quick Reference
-
-- Entry: [src/main.jsx](src/main.jsx) → [src/App.jsx](src/App.jsx)
-- Core engine: [src/components/SessionPlayer.jsx](src/components/SessionPlayer.jsx)
-- Pack data: [src/packs.js](src/packs.js)
-- Tests: [src/__tests__/flicker.test.js](src/__tests__/flicker.test.js)
-- Build: [Build.bat](Build.bat)
-- Config: [vite.config.js](vite.config.js), [capacitor.config.json](capacitor.config.json)
+1. **Capacitor sync**: After web edits, MUST run `npx cap sync`
+2. **Frequency limits**: Never exceed 15 Hz
+3. **Canvas performance**: Avoid heavy calculations in 60fps draw loops
+4. **Ramp times**: Always use ≥3s rampIn/rampOut
+5. **Android testing**: Real device required - emulator won't show accurate flicker

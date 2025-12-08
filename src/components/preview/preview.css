@@ -1,0 +1,218 @@
+/* Preview Page Styles */
+
+/* Container */
+.preview-container {
+  min-height: 100vh;
+  height: 100vh;
+  overflow: auto;
+  background: linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 120px;
+}
+
+/* Back Button */
+.preview-back-wrapper {
+  padding: 20px 20px 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.preview-back-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-back-btn.beginner { color: #4ade80; }
+.preview-back-btn.intermediate { color: #a78bfa; }
+.preview-back-btn.advanced { color: #f87171; }
+
+/* Header */
+.preview-header {
+  padding: 20px 20px 30px;
+  text-align: center;
+}
+
+.preview-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.preview-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.preview-description {
+  font-size: 15px;
+  color: #888;
+  margin: 0 auto;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* Stats Row */
+.preview-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 0 20px 30px;
+  flex-wrap: wrap;
+}
+
+.preview-stat-card {
+  text-align: center;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.preview-stat-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.preview-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.preview-stat-value.beginner { color: #4ade80; }
+.preview-stat-value.intermediate { color: #a78bfa; }
+.preview-stat-value.advanced { color: #f87171; }
+
+.preview-stat-label {
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+/* Section Container */
+.preview-section {
+  padding: 0 20px 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.preview-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+/* Phase Cards Grid */
+.preview-phases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.preview-phase-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+
+.preview-phase-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-phase-frequency {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.preview-phase-frequency.beginner { color: #4ade80; }
+.preview-phase-frequency.intermediate { color: #a78bfa; }
+.preview-phase-frequency.advanced { color: #f87171; }
+
+.preview-phase-meta {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.preview-phase-pattern {
+  font-size: 10px;
+  color: #555;
+}
+
+/* Footer */
+.preview-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent 0%, #0a0a0f 20%);
+}
+
+.preview-footer-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.preview-begin-btn {
+  width: 100%;
+  padding: 18px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.preview-begin-btn.beginner,
+.preview-begin-btn.intermediate {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+}
+
+.preview-begin-btn.advanced {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* Intensity Graph */
+.intensity-graph-container {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.intensity-graph-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.intensity-graph-svg {
+  width: 100%;
+  height: 180px;
+}
