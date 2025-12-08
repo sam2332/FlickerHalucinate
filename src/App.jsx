@@ -4,16 +4,8 @@ import SeizureWarning from './components/SeizureWarning';
 import PackSelection from './components/PackSelection';
 import PackPreview from './components/PackPreview';
 import SessionPlayer from './components/SessionPlayer';
-import SessionReview from './components/SessionReview';
-
-const SCREENS = {
-  SPLASH: 'splash',
-  WARNING: 'warning',
-  PACKS: 'packs',
-  PREVIEW: 'preview',
-  SESSION: 'session',
-  REVIEW: 'review'
-};
+import { SCREENS } from './constants';
+import { isWarningAccepted, acceptWarning } from './services';
 
 export default function App() {
   const [screen, setScreen] = useState(SCREENS.SPLASH);
@@ -21,7 +13,7 @@ export default function App() {
   const [sessionData, setSessionData] = useState(null);
 
   useEffect(() => {
-    if (screen === SCREENS.WARNING && sessionStorage.getItem('seizureWarningAccepted') === 'true') {
+    if (screen === SCREENS.WARNING && isWarningAccepted()) {
       setScreen(SCREENS.PACKS);
     }
   }, [screen]);
@@ -29,7 +21,7 @@ export default function App() {
   const handleSplashComplete = () => setScreen(SCREENS.WARNING);
   
   const handleAcceptWarning = () => {
-    sessionStorage.setItem('seizureWarningAccepted', 'true');
+    acceptWarning();
     setScreen(SCREENS.PACKS);
   };
   
@@ -48,8 +40,9 @@ export default function App() {
   };
   
   const handleSessionComplete = (data) => {
-    setSessionData(data);
-    setScreen(SCREENS.REVIEW);
+    setSessionData(null);
+    setSelectedPack(null);
+    setScreen(SCREENS.PACKS);
   };
   
   const handleReviewComplete = (action) => {
@@ -88,8 +81,6 @@ export default function App() {
         return null;
       }
       return <SessionPlayer pack={selectedPack} onExit={handleExitSession} onComplete={handleSessionComplete} />;
-    case SCREENS.REVIEW:
-      return <SessionReview sessionData={sessionData} pack={selectedPack} onComplete={handleReviewComplete} />;
     default:
       return <SplashScreen onComplete={handleSplashComplete} />;
   }

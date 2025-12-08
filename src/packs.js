@@ -461,18 +461,6 @@ export const EXPERIENCE_PACKS = [
         intensity: 0.5
       })
     ]
-  },
-  // Random Mode - Generates unpredictable pattern sequences
-  {
-    id: 'random-mode',
-    name: 'Random Mode',
-    description: 'Unpredictable journey through random patterns. Never the same twice.',
-    duration: 300, // 5 minutes base, but dynamically generated
-    difficulty: 'intermediate',
-    icon: '🎲',
-    color: 'from-pink-500 to-violet-600',
-    isRandom: true, // Special flag for random generation
-    phases: [] // Will be populated dynamically
   }
 ];
 

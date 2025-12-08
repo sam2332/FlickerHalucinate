@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { EXPERIENCE_PACKS, formatDuration, getPackDuration, generateRandomPack } from '../packs';
+import React from 'react';
+import { EXPERIENCE_PACKS, getPackDuration } from '../packs';
+import { formatDuration } from '../utils/format';
 
 const PackCard = ({ pack, onSelect, index }) => {
   const duration = getPackDuration(pack);
@@ -15,13 +16,7 @@ const PackCard = ({ pack, onSelect, index }) => {
   };
 
   const handleClick = () => {
-    // Generate random pack phases if it's random mode
-    if (pack.isRandom) {
-      const randomPack = generateRandomPack();
-      onSelect(randomPack);
-    } else {
-      onSelect(pack);
-    }
+    onSelect(pack);
   };
   
   return (
@@ -109,7 +104,7 @@ const PackCard = ({ pack, onSelect, index }) => {
             <span style={{
               fontSize: '11px',
               color: '#666',
-            }}>{pack.isRandom ? 'Random' : `${pack.phases.length} phases`}</span>
+            }}>{pack.phases.length} phases</span>
           </div>
         </div>
         
@@ -131,48 +126,28 @@ const PackCard = ({ pack, onSelect, index }) => {
       </div>
       
       {/* Phase progress bar */}
-      {!pack.isRandom && (
-        <div style={{
-          display: 'flex',
-          gap: '3px',
-          marginTop: '12px',
-        }}>
-          {pack.phases.map((phase, i) => (
-            <div
-              key={i}
-              style={{
-                height: '3px',
-                borderRadius: '2px',
-                background: `${accents[pack.difficulty]}40`,
-                flex: phase.duration,
-              }}
-            />
-          ))}
-        </div>
-      )}
-      {pack.isRandom && (
-        <div style={{
-          marginTop: '12px',
-          fontSize: '11px',
-          color: accents[pack.difficulty],
-          textAlign: 'center',
-          opacity: 0.7,
-        }}>
-          • • • Unpredictable Patterns • • •
-        </div>
-      )}
+      <div style={{
+        display: 'flex',
+        gap: '3px',
+        marginTop: '12px',
+      }}>
+        {pack.phases.map((phase, i) => (
+          <div
+            key={i}
+            style={{
+              height: '3px',
+              borderRadius: '2px',
+              background: `${accents[pack.difficulty]}40`,
+              flex: phase.duration,
+            }}
+          />
+        ))}
+      </div>
     </button>
   );
 };
 
 export default function PackSelection({ onSelectPack }) {
-  const [recentReviews, setRecentReviews] = useState([]);
-  
-  useEffect(() => {
-    const reviews = JSON.parse(localStorage.getItem('flickerReviews') || '[]');
-    setRecentReviews(reviews.slice(0, 3));
-  }, []);
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -242,60 +217,6 @@ export default function PackSelection({ onSelectPack }) {
           </div>
         </div>
       </div>
-
-      {/* Recent Reviews */}
-      {recentReviews.length > 0 && (
-        <div style={{
-          padding: '0 20px 30px',
-          maxWidth: '600px',
-          margin: '0 auto',
-        }}>
-          <h3 style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#fff',
-            margin: '0 0 12px',
-          }}>Recent Sessions</h3>
-          {recentReviews.map((review) => (
-            <div
-              key={review.id}
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#fff',
-                  marginBottom: '4px',
-                }}>
-                  {review.packName}
-                  {review.bookmarked && ' 🔖'}
-                </div>
-                <div style={{
-                  fontSize: '11px',
-                  color: '#666',
-                }}>
-                  {formatDuration(review.duration)} • {new Date(review.timestamp).toLocaleDateString()}
-                </div>
-              </div>
-              <div style={{
-                fontSize: '16px',
-              }}>
-                {'⭐'.repeat(review.rating)}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
