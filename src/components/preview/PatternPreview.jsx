@@ -142,31 +142,29 @@ export default function PatternPreview({ patterns, currentIndex, onPrev, onNext 
 
   return (
     <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-      <h2 className="text-base font-semibold mb-4 text-center">Visual Patterns</h2>
+      <h2 className="text-base font-semibold mb-4 text-center">Flashlight Mode</h2>
       
       <div className="flex flex-col items-center">
-        {/* Pattern Icon */}
-        <div className="w-32 h-32 bg-gray-900 rounded-lg border border-gray-600 p-4 mb-4">
-          {PATTERN_ICONS[currentPattern] || (
-            <div className="w-full h-full bg-gray-700 rounded" />
-          )}
+        {/* Flashlight Icon */}
+        <div className="w-32 h-32 bg-gray-900 rounded-lg border border-gray-600 p-4 mb-4 flex items-center justify-center">
+          <div style={{ fontSize: '64px' }}>💡</div>
         </div>
 
-        {/* Pattern Name */}
+        {/* Mode Name */}
         <h3 className="font-semibold text-lg text-center mb-1">
-          {PATTERN_NAMES[currentPattern] || currentPattern}
+          Phone Flashlight
         </h3>
 
-        {/* Pattern Counter */}
+        {/* Pattern Counter - still show if multiple patterns exist */}
         {patterns.length > 1 && (
           <span className="text-xs text-gray-500 mb-2">
-            Pattern {currentIndex + 1} of {patterns.length}
+            Phase {currentIndex + 1} of {patterns.length}
           </span>
         )}
 
         {/* Description */}
         <p className="text-sm text-gray-400 text-center max-w-md mb-4">
-          {PATTERN_DESCRIPTIONS[currentPattern] || 'Visual pattern for neural entrainment.'}
+          This session uses your phone's flashlight to create the flicker effect. The light will pulse at specific frequencies to induce visual phenomena and brainwave entrainment. Make sure your flashlight is functional before starting.
         </p>
 
         {/* Navigation */}
@@ -176,13 +174,13 @@ export default function PatternPreview({ patterns, currentIndex, onPrev, onNext 
               onClick={onPrev}
               className="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
             >
-              ← Previous
+              ← Previous Phase
             </button>
             <button
               onClick={onNext}
               className="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
             >
-              Next →
+              Next Phase →
             </button>
           </div>
         )}

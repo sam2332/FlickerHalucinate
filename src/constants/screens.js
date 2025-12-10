@@ -8,4 +8,5 @@ export const SCREENS = Object.freeze({
   PREVIEW: 'preview',
   SESSION: 'session',
   REVIEW: 'review',
+  SETTINGS: 'settings',
 });

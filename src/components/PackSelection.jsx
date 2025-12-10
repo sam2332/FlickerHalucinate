@@ -1,9 +1,11 @@
 import React from 'react';
 import { EXPERIENCE_PACKS, getPackDuration } from '../packs';
 import { formatDuration } from '../utils/format';
+import { getPackStatistics, getRelativeTime, formatTotalTime } from '../services/statisticsService';
 
 const PackCard = ({ pack, onSelect, index }) => {
   const duration = getPackDuration(pack);
+  const stats = getPackStatistics(pack.id);
   const gradients = {
     'beginner': 'linear-gradient(135deg, #1a4a3a 0%, #0d2818 100%)',
     'intermediate': 'linear-gradient(135deg, #3a2a5a 0%, #1a1030 100%)',
@@ -105,7 +107,45 @@ const PackCard = ({ pack, onSelect, index }) => {
               fontSize: '11px',
               color: '#666',
             }}>{pack.phases.length} phases</span>
+            {stats.totalSessions > 0 && (
+              <>
+                <span style={{ fontSize: '11px', color: '#555' }}>•</span>
+                <span style={{
+                  fontSize: '11px',
+                  color: '#888',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}>
+                  {stats.totalSessions}× played
+                </span>
+              </>
+            )}
           </div>
+          {/* User stats row */}
+          {stats.totalSessions > 0 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginTop: '6px',
+              fontSize: '11px',
+              color: '#555',
+            }}>
+              {stats.averageRating > 0 && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <span style={{ color: '#fbbf24' }}>★</span>
+                  {stats.averageRating.toFixed(1)}
+                </span>
+              )}
+              <span>{formatTotalTime(stats.totalTime)} total</span>
+              <span>•</span>
+              <span>{getRelativeTime(stats.lastPlayed)}</span>
+              {stats.favorite && (
+                <span style={{ color: '#f87171' }}>❤️</span>
+              )}
+            </div>
+          )}
         </div>
         
         {/* Play icon */}
@@ -147,7 +187,7 @@ const PackCard = ({ pack, onSelect, index }) => {
   );
 };
 
-export default function PackSelection({ onSelectPack }) {
+export default function PackSelection({ onSelectPack, onOpenSettings }) {
   return (
     <div style={{
       minHeight: '100vh',
@@ -160,20 +200,44 @@ export default function PackSelection({ onSelectPack }) {
       {/* Header */}
       <div style={{
         padding: '40px 20px 20px',
-        textAlign: 'center',
         background: 'linear-gradient(180deg, rgba(20,20,30,0.9) 0%, transparent 100%)',
+        position: 'relative',
       }}>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: '700',
-          color: '#fff',
-          margin: '0 0 6px 0',
-        }}>Experiences</h1>
-        <p style={{
-          fontSize: '14px',
-          color: '#666',
-          margin: 0,
-        }}>Choose your visual journey</p>
+        {/* Settings Button */}
+        <button
+          onClick={onOpenSettings}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            width: '40px',
+            height: '40px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '20px',
+          }}
+          aria-label="Settings"
+        >
+          ⚙️
+        </button>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{
+            fontSize: '28px',
+            fontWeight: '700',
+            color: '#fff',
+            margin: '0 0 6px 0',
+          }}>Experiences</h1>
+          <p style={{
+            fontSize: '14px',
+            color: '#666',
+            margin: 0,
+          }}>Choose your visual journey</p>
+        </div>
       </div>
       
       {/* Pack List */}

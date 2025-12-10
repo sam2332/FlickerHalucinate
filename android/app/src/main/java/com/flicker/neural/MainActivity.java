@@ -4,10 +4,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import com.getcapacitor.BridgeActivity;
+import com.flicker.neural.plugins.FlashlightPlugin;
 
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Register custom plugins before super.onCreate
+        registerPlugin(FlashlightPlugin.class);
+        
         super.onCreate(savedInstanceState);
         
         // Enable immersive fullscreen mode

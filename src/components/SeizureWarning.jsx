@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
+import { acceptWarning } from '../services';
 
 export default function SeizureWarning({ onAccept }) {
   const [checked, setChecked] = useState(false);
+  
+  const handleAccept = () => {
+    acceptWarning();
+    onAccept();
+  };
   
   return (
     <div style={{
@@ -94,8 +100,8 @@ export default function SeizureWarning({ onAccept }) {
           color: '#999',
           lineHeight: '1.6',
         }}>
-          Uses rhythmic light at <span style={{ color: '#00d4ff' }}>8-13 Hz</span> to 
-          create temporary visual phenomena through neural entrainment.
+          Uses your phone's <span style={{ color: '#00d4ff' }}>flashlight</span> to create rhythmic light at <span style={{ color: '#00d4ff' }}>8-13 Hz</span>, 
+          producing temporary visual phenomena through neural entrainment.
         </div>
         
         {/* Checkbox */}
@@ -138,7 +144,7 @@ export default function SeizureWarning({ onAccept }) {
         
         {/* Button */}
         <button 
-          onClick={onAccept}
+          onClick={handleAccept}
           disabled={!checked}
           style={{
             width: '100%',

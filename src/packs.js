@@ -12,20 +12,30 @@ export const PATTERNS = {
   VORTEX: 'vortex'
 };
 
-// TODO: GUARDRAIL - Frequency bands define the Hz ranges for neural entrainment
-// Delta (0.5-4 Hz): Deep sleep - NOT USED (too slow for visual)
-// Theta (4-8 Hz): Deep meditation, drowsiness  
-// Alpha (8-13 Hz): Relaxed wakefulness - MOST EFFECTIVE for visual entrainment
-// Beta (13-30 Hz): Active thinking - CAUTION: 15-25 Hz is seizure trigger zone
-// Gamma (30-100 Hz): High cognition - too fast for most displays
+// TODO: GUARDRAIL - Frequency bands based on Dreamachine research (Brion Gysin, 1959)
+// and subsequent EEG/photic entrainment studies
+//
+// DREAMACHINE RESEARCH NOTES:
+// - Original Dreamachine used 78 RPM turntable = ~8-13 Hz flicker
+// - 10 Hz is the "Berger frequency" - dominant alpha rhythm
+// - 8-13 Hz produces strongest photic driving response
+// - Closed eyes facing light source is essential
+// - Ganzfeld (uniform field) enhances hallucinations
+//
+// Delta (0.5-4 Hz): Deep sleep - NOT USED (too slow for visual entrainment)
+// Theta (4-8 Hz): Hypnagogic states, drowsiness, lucid dream induction
+// Alpha (8-13 Hz): Dreamachine sweet spot - strongest visual phenomena
+// Beta (13-30 Hz): CAUTION: 15-25 Hz triggers photosensitive epilepsy
+// Gamma (30-100 Hz): Above flicker fusion threshold - no entrainment
 export const FREQUENCY_BANDS = {
-  DELTA: { min: 0.5, max: 4, name: 'Delta', description: 'Deep sleep states' },
-  THETA: { min: 4, max: 8, name: 'Theta', description: 'Deep meditation, drowsiness' },
-  ALPHA_LOW: { min: 8, max: 10, name: 'Low Alpha', description: 'Relaxed awareness' },
-  ALPHA_HIGH: { min: 10, max: 13, name: 'High Alpha', description: 'Calm focus' },
-  BETA_LOW: { min: 13, max: 20, name: 'Low Beta', description: 'Active focus' },
-  BETA_HIGH: { min: 20, max: 30, name: 'High Beta', description: 'Intense focus, alertness' },
-  GAMMA: { min: 30, max: 50, name: 'Gamma', description: 'Peak cognition, insight' }
+  DELTA: { min: 0.5, max: 4, name: 'Delta', description: 'Deep sleep (not used)' },
+  THETA: { min: 4, max: 8, name: 'Theta', description: 'Hypnagogic/dream states' },
+  ALPHA_LOW: { min: 8, max: 10, name: 'Low Alpha', description: 'Dreamachine zone - relaxed visions' },
+  ALPHA_MID: { min: 10, max: 10, name: 'Berger Frequency', description: '10 Hz sweet spot' },
+  ALPHA_HIGH: { min: 10, max: 13, name: 'High Alpha', description: 'Dreamachine zone - vivid patterns' },
+  BETA_LOW: { min: 13, max: 15, name: 'Low Beta', description: 'Alert focus (safe limit)' },
+  BETA_HIGH: { min: 15, max: 25, name: 'DANGER ZONE', description: 'Seizure trigger range - AVOID' },
+  GAMMA: { min: 30, max: 50, name: 'Gamma', description: 'Above flicker fusion' }
 };
 
 // Phase structure for each step in a pack
@@ -51,414 +61,458 @@ const createPhase = (config) => ({
 
 export const EXPERIENCE_PACKS = [
   {
-    id: 'gentle-intro',
-    name: 'Gentle Introduction',
-    description: 'A soft, beginner-friendly experience. Perfect for first-time users.',
-    duration: 180,
+    // Classic Dreamachine experience based on Brion Gysin's 1959 design
+    // Uses 10 Hz (Berger frequency) as the optimal alpha entrainment point
+    id: 'classic-dreamachine',
+    name: 'Classic Dreamachine',
+    description: 'Authentic Dreamachine experience at 10 Hz - the Berger frequency. Close your eyes and face the light.',
+    duration: 300,
     difficulty: 'beginner',
-    icon: '🌅',
-    color: 'from-blue-500 to-purple-500',
+    icon: '🌀',
+    color: 'from-amber-400 to-orange-500',
     phases: [
       createPhase({
-        name: 'Settling In',
-        duration: 30,
-        frequency: 8,    // TODO: Low alpha - relaxed state
-        pattern: PATTERNS.UNIFORM,
-        rampIn: 5,
-        intensity: 0.7,  // TODO: GUARDRAIL - beginner starts gentler
-        description: 'Gentle alpha waves to ease you in'
-      }),
-      createPhase({
-        name: 'Soft Waves',
+        name: 'Alpha Onset',
         duration: 45,
-        frequency: 9,
-        pattern: PATTERNS.RADIAL,
-        intensity: 0.8,
-        description: 'Subtle radial patterns emerge'
+        frequency: 8,     // Start at low alpha boundary
+        pattern: PATTERNS.UNIFORM,
+        rampIn: 8,        // Slow onset per Dreamachine tradition
+        intensity: 0.7,
+        description: 'Gradual alpha entrainment begins'
       }),
       createPhase({
-        name: 'Deep Alpha',
-        duration: 60,
-        frequency: 10,   // TODO: Peak alpha entrainment frequency
+        name: 'Berger Frequency',
+        duration: 120,
+        frequency: 10,    // The 10 Hz sweet spot - Dreamachine optimal
         pattern: PATTERNS.UNIFORM,
         intensity: 0.85,
-        description: 'Peak alpha entrainment'
+        description: 'Core Dreamachine experience at 10 Hz'
       }),
       createPhase({
-        name: 'Return',
+        name: 'High Alpha',
+        duration: 60,
+        frequency: 11,    // Slight increase for pattern variation
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.9,
+        jitter: 0.1,      // Subtle organic variation
+        description: 'Enhanced visual phenomena'
+      }),
+      createPhase({
+        name: 'Alpha Descent',
         duration: 45,
+        frequency: 9,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.75,
+        description: 'Gradual return from peak'
+      }),
+      createPhase({
+        name: 'Emergence',
+        duration: 30,
         frequency: 8,
         pattern: PATTERNS.UNIFORM,
-        rampOut: 10,
-        intensity: 0.6,
-        description: 'Gentle fade back to baseline'
+        rampOut: 12,
+        intensity: 0.5,
+        description: 'Gentle return to waking state'
       })
     ]
   },
   {
-    id: 'deep-tunnel',
-    name: 'Deep Tunnel',
-    description: 'Experience profound depth perception shifts and tunnel visions.',
-    duration: 240,
+    // Hypnagogic tunnel experience - uses alpha-to-theta descent
+    // Based on research showing theta (4-8 Hz) induces dream-like states
+    id: 'hypnagogic-descent',
+    name: 'Hypnagogic Descent',
+    description: 'Alpha-to-theta journey inducing hypnagogic (pre-sleep) visions. Tunnel perception and dream imagery.',
+    duration: 360,
     difficulty: 'intermediate',
-    icon: '🕳️',
+    icon: '🌙',
     color: 'from-purple-600 to-indigo-800',
     phases: [
       createPhase({
-        name: 'Descent Prep',
-        duration: 30,
-        frequency: 10,
+        name: 'Alpha Ground',
+        duration: 45,
+        frequency: 10,    // Start at stable alpha
         pattern: PATTERNS.UNIFORM,
-        rampIn: 5,
-        intensity: 0.75
+        rampIn: 8,
+        intensity: 0.75,
+        description: 'Establish alpha baseline'
       }),
       createPhase({
-        name: 'Rings Form',
-        duration: 40,
-        frequency: 10,
-        pattern: PATTERNS.CONCENTRIC,
-        intensity: 0.85
-      }),
-      createPhase({
-        name: 'Tunnel Opens',
+        name: 'Alpha-Theta Border',
         duration: 60,
-        frequency: 9.5,
-        pattern: PATTERNS.TUNNEL,
-        intensity: 0.95,  // TODO: GUARDRAIL REMOVED - was 0.85
-        jitter: 0.3
+        frequency: 8,     // 8 Hz is alpha-theta boundary
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.85,
+        description: 'Crossing into theta territory'
       }),
       createPhase({
-        name: 'Deep Dive',
-        duration: 70,
-        frequency: 7.5,  // TODO: Theta for deep states
-        pattern: PATTERNS.TUNNEL,
-        intensity: 1.0,  // TODO: GUARDRAIL REMOVED - full intensity
-        jitter: 0.4
+        name: 'Theta Onset',
+        duration: 75,
+        frequency: 7,     // Deep theta - hypnagogic imagery
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.9,
+        jitter: 0.15,     // Subtle variation enhances dream-like quality
+        description: 'Hypnagogic imagery begins'
       }),
       createPhase({
-        name: 'Ascent',
-        duration: 40,
-        frequency: 10,
-        pattern: PATTERNS.RADIAL,
-        rampOut: 8,
-        intensity: 0.6
+        name: 'Deep Theta',
+        duration: 90,
+        frequency: 5.5,   // Deep theta - approaching sleep threshold
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.95,
+        jitter: 0.2,
+        description: 'Deep dream-like state'
+      }),
+      createPhase({
+        name: 'Theta Hold',
+        duration: 45,
+        frequency: 6,     // Maintain low theta
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.85,
+        description: 'Sustained hypnagogic state'
+      }),
+      createPhase({
+        name: 'Return to Alpha',
+        duration: 45,
+        frequency: 9,     // Gradual return
+        pattern: PATTERNS.UNIFORM,
+        rampOut: 10,
+        intensity: 0.6,
+        description: 'Gentle awakening'
       })
     ]
   },
   {
-    id: 'spiral-journey',
-    name: 'Spiral Journey',
-    description: 'A hypnotic spiral experience that builds in complexity.',
-    duration: 300,
+    // Alpha spectrum exploration - sweeps through 8-13 Hz range
+    // Based on research showing different alpha sub-bands produce different phenomena
+    id: 'alpha-spectrum',
+    name: 'Alpha Spectrum',
+    description: 'Explore the full alpha range (8-13 Hz). Each frequency produces unique visual phenomena.',
+    duration: 360,
     difficulty: 'intermediate',
-    icon: '🌀',
+    icon: '🌈',
     color: 'from-cyan-500 to-blue-600',
     phases: [
       createPhase({
-        name: 'Center Point',
-        duration: 25,
-        frequency: 10,
-        pattern: PATTERNS.UNIFORM,
-        rampIn: 4,
-        intensity: 0.7
-      }),
-      createPhase({
-        name: 'Rotation Begins',
-        duration: 50,
-        frequency: 10.5,
-        pattern: PATTERNS.SPIRAL,
-        intensity: 0.85
-      }),
-      createPhase({
-        name: 'Vortex',
-        duration: 80,
-        frequency: 11,
-        pattern: PATTERNS.VORTEX,
-        intensity: 0.95,
-        jitter: 0.25
-      }),
-      createPhase({
-        name: 'Starburst',
-        duration: 60,
-        frequency: 10,
-        pattern: PATTERNS.STARBURST,
-        intensity: 1.0,  // TODO: GUARDRAIL REMOVED - full intensity
-        jitter: 0.15
-      }),
-      createPhase({
-        name: 'Spiral Down',
-        duration: 50,
-        frequency: 9,
-        pattern: PATTERNS.SPIRAL,
-        intensity: 0.8
-      }),
-      createPhase({
-        name: 'Stillness',
-        duration: 35,
+        name: '8 Hz - Low Alpha',
+        duration: 45,
         frequency: 8,
         pattern: PATTERNS.UNIFORM,
-        rampOut: 10,
-        intensity: 0.5
-      })
-    ]
-  },
-  {
-    id: 'geometry-explorer',
-    name: 'Sacred Geometry',
-    description: 'Explore geometric patterns and fractals within your mind.',
-    duration: 360,
-    difficulty: 'advanced',
-    icon: '🔷',
-    color: 'from-amber-500 to-orange-600',
-    phases: [
-      createPhase({
-        name: 'Grid Init',
-        duration: 30,
-        frequency: 10,
-        pattern: PATTERNS.CHECKERBOARD,
-        rampIn: 5,
-        intensity: 0.75
+        rampIn: 6,
+        intensity: 0.75,
+        description: 'Relaxed, diffuse patterns'
       }),
       createPhase({
-        name: 'Pattern Shift',
-        duration: 45,
-        frequency: 12,   // TODO: Higher alpha for alertness
-        pattern: PATTERNS.CHECKERBOARD,
-        intensity: 0.9,
-        jitter: 0.2
+        name: '9 Hz - Rising',
+        duration: 50,
+        frequency: 9,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.85,
+        description: 'Patterns begin to organize'
       }),
       createPhase({
-        name: 'Radial Geometry',
-        duration: 60,
-        frequency: 11,
-        pattern: PATTERNS.RADIAL,
-        intensity: 0.95
-      }),
-      createPhase({
-        name: 'Complex Forms',
-        duration: 80,
-        frequency: 10,
-        pattern: PATTERNS.STARBURST,
-        intensity: 1.0,  // TODO: GUARDRAIL REMOVED
-        jitter: 0.3
-      }),
-      createPhase({
-        name: 'Tunnel Geometry',
+        name: '10 Hz - Berger Peak',
         duration: 70,
-        frequency: 9,
-        pattern: PATTERNS.TUNNEL,
-        intensity: 0.95
+        frequency: 10,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.95,
+        jitter: 0.1,
+        description: 'Optimal entrainment frequency'
       }),
       createPhase({
-        name: 'Integration',
+        name: '11 Hz - High Alpha',
+        duration: 60,
+        frequency: 11,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 1.0,
+        jitter: 0.1,
+        description: 'Vivid geometric forms'
+      }),
+      createPhase({
+        name: '12 Hz - Upper Alpha',
+        duration: 50,
+        frequency: 12,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 1.0,
+        jitter: 0.15,
+        description: 'Complex, rapid patterns'
+      }),
+      createPhase({
+        name: '10 Hz - Return',
         duration: 45,
-        frequency: 8,
-        pattern: PATTERNS.CONCENTRIC,
-        intensity: 0.75
+        frequency: 10,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.8,
+        description: 'Return to center'
       }),
       createPhase({
-        name: 'Resolution',
-        duration: 30,
-        frequency: 7,    // TODO: Theta for integration
+        name: 'Emergence',
+        duration: 40,
+        frequency: 8,
         pattern: PATTERNS.UNIFORM,
         rampOut: 12,
-        intensity: 0.5
+        intensity: 0.5,
+        description: 'Gentle fade out'
       })
     ]
   },
   {
-    id: 'theta-meditation',
-    name: 'Theta Meditation',
-    description: 'Deep theta state for profound relaxation and meditation.',
-    duration: 420,
-    difficulty: 'intermediate',
+    // Extended theta session for deep meditation and lucid dream induction
+    // Research shows 4-7 Hz facilitates hypnagogic states and creativity
+    id: 'theta-gateway',
+    name: 'Theta Gateway',
+    description: 'Deep theta journey for meditation and lucid dream practice. Extended low-frequency session.',
+    duration: 480,
+    difficulty: 'advanced',
     icon: '🧘',
-    color: 'from-violet-500 to-purple-700',
+    color: 'from-amber-500 to-orange-600',
     phases: [
       createPhase({
         name: 'Alpha Entry',
         duration: 40,
         frequency: 10,
         pattern: PATTERNS.UNIFORM,
-        rampIn: 8,
-        intensity: 0.65
+        rampIn: 10,
+        intensity: 0.7,
+        description: 'Establish baseline relaxation'
       }),
       createPhase({
         name: 'Alpha-Theta Bridge',
         duration: 50,
         frequency: 8,
-        pattern: PATTERNS.RADIAL,
-        intensity: 0.7
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.8,
+        description: 'Cross into theta territory'
       }),
       createPhase({
-        name: 'Theta Onset',
+        name: 'Upper Theta',
         duration: 60,
-        frequency: 7,    // TODO: Entering theta
+        frequency: 7,
         pattern: PATTERNS.UNIFORM,
-        intensity: 0.75
+        intensity: 0.85,
+        jitter: 0.1,
+        description: 'Hypnagogic imagery emerges'
+      }),
+      createPhase({
+        name: 'Mid Theta',
+        duration: 90,
+        frequency: 6,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.9,
+        jitter: 0.15,
+        description: 'Deep meditative state'
       }),
       createPhase({
         name: 'Deep Theta',
-        duration: 120,
-        frequency: 5.5,  // TODO: Deep theta - drowsy/meditative
-        pattern: PATTERNS.CONCENTRIC,
-        intensity: 0.85,
-        jitter: 0.15
+        duration: 100,
+        frequency: 5,     // Near sleep threshold
+        pattern: PATTERNS.UNIFORM,
+        intensity: 1.0,   // Full intensity for advanced pack
+        jitter: 0.2,
+        description: 'Profound theta - lucid dream window'
       }),
       createPhase({
         name: 'Theta Hold',
-        duration: 80,
-        frequency: 6,
+        duration: 60,
+        frequency: 5.5,
         pattern: PATTERNS.UNIFORM,
-        intensity: 0.75
+        intensity: 0.85,
+        description: 'Sustained deep state'
       }),
       createPhase({
-        name: 'Return to Alpha',
+        name: 'Gradual Rise',
         duration: 50,
+        frequency: 7,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.7,
+        description: 'Begin emergence'
+      }),
+      createPhase({
+        name: 'Alpha Return',
+        duration: 30,
         frequency: 9,
         pattern: PATTERNS.UNIFORM,
-        rampOut: 15,
-        intensity: 0.6
-      }),
-      createPhase({
-        name: 'Awakening',
-        duration: 20,
-        frequency: 11,   // TODO: Higher alpha for alertness return
-        pattern: PATTERNS.UNIFORM,
-        rampOut: 8,
-        intensity: 0.5
+        rampOut: 12,
+        intensity: 0.5,
+        description: 'Return to waking awareness'
       })
     ]
   },
   {
-    id: 'intensity-peaks',
-    name: 'Intensity Peaks',
-    description: 'Dynamic experience with building intensity waves. For experienced users.',
+    // Extended alpha session for geometric hallucinations
+    // Research shows 10-12 Hz produces most vivid pattern perception
+    id: 'geometric-visions',
+    name: 'Geometric Visions',
+    description: 'Extended high-alpha session optimized for geometric pattern perception and color phenomena.',
+    duration: 420,
+    difficulty: 'intermediate',
+    icon: '🔷',
+    color: 'from-cyan-500 to-blue-600',
+    phases: [
+      createPhase({
+        name: 'Alpha Onset',
+        duration: 40,
+        frequency: 9,
+        pattern: PATTERNS.UNIFORM,
+        rampIn: 8,
+        intensity: 0.7,
+        description: 'Gradual entrainment'
+      }),
+      createPhase({
+        name: 'Pattern Emergence',
+        duration: 60,
+        frequency: 10,    // Berger frequency
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.85,
+        description: 'Geometric patterns begin'
+      }),
+      createPhase({
+        name: 'Color Field',
+        duration: 90,
+        frequency: 11,    // High alpha - vivid colors
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.95,
+        jitter: 0.1,
+        description: 'Color phenomena peak'
+      }),
+      createPhase({
+        name: 'Mandala Phase',
+        duration: 80,
+        frequency: 12,    // Top of alpha - complex patterns
+        pattern: PATTERNS.UNIFORM,
+        intensity: 1.0,
+        jitter: 0.15,
+        description: 'Complex mandala-like forms'
+      }),
+      createPhase({
+        name: 'Stabilization',
+        duration: 60,
+        frequency: 10,    // Return to stable alpha
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.85,
+        description: 'Pattern integration'
+      }),
+      createPhase({
+        name: 'Gentle Descent',
+        duration: 50,
+        frequency: 9,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.7,
+        description: 'Gradual fade'
+      }),
+      createPhase({
+        name: 'Emergence',
+        duration: 40,
+        frequency: 8,
+        pattern: PATTERNS.UNIFORM,
+        rampOut: 15,
+        intensity: 0.5,
+        description: 'Return to waking'
+      })
+    ]
+  },
+  {
+    // Short 5-minute session for quick entrainment
+    // Uses 10 Hz throughout for reliable, consistent experience
+    id: 'quick-session',
+    name: 'Quick Session',
+    description: '5-minute focused session at optimal 10 Hz. Perfect for short breaks or testing.',
+    duration: 300,
+    difficulty: 'beginner',
+    icon: '⏱️',
+    color: 'from-green-500 to-teal-500',
+    phases: [
+      createPhase({
+        name: 'Quick Onset',
+        duration: 45,
+        frequency: 9,
+        pattern: PATTERNS.UNIFORM,
+        rampIn: 6,
+        intensity: 0.75,
+        description: 'Rapid but safe onset'
+      }),
+      createPhase({
+        name: 'Core Session',
+        duration: 180,
+        frequency: 10,    // Pure Berger frequency
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.9,
+        jitter: 0.05,     // Minimal variation
+        description: 'Sustained 10 Hz entrainment'
+      }),
+      createPhase({
+        name: 'Fade Out',
+        duration: 75,
+        frequency: 9,
+        pattern: PATTERNS.UNIFORM,
+        rampOut: 12,
+        intensity: 0.6,
+        description: 'Gradual emergence'
+      })
+    ]
+  },
+  // Advanced experience - pushes to upper alpha/low beta boundary
+  // SAFETY: Stays at or below 14 Hz to avoid 15-25 Hz danger zone
+  {
+    id: 'intensity-wave',
+    name: 'Intensity Wave',
+    description: 'High-intensity alpha with dynamic variation. Full brightness, maximum entrainment.',
     duration: 300,
     difficulty: 'advanced',
     icon: '⚡',
-    color: 'from-red-500 to-pink-600',
-    phases: [
-      createPhase({
-        name: 'Warmup',
-        duration: 25,
-        frequency: 10,
-        pattern: PATTERNS.UNIFORM,
-        rampIn: 4,
-        intensity: 0.6
-      }),
-      createPhase({
-        name: 'First Wave',
-        duration: 40,
-        frequency: 12,   // TODO: High alpha
-        pattern: PATTERNS.RADIAL,
-        intensity: 0.9
-      }),
-      createPhase({
-        name: 'Valley',
-        duration: 20,
-        frequency: 8,
-        pattern: PATTERNS.UNIFORM,
-        intensity: 0.5
-      }),
-      createPhase({
-        name: 'Second Wave',
-        duration: 50,
-        frequency: 13,   // TODO: Alpha-beta border
-        pattern: PATTERNS.SPIRAL,
-        intensity: 1.0,  // TODO: GUARDRAIL REMOVED - full intensity
-        jitter: 0.25
-      }),
-      createPhase({
-        name: 'Valley 2',
-        duration: 20,
-        frequency: 7,
-        pattern: PATTERNS.UNIFORM,
-        intensity: 0.4
-      }),
-      createPhase({
-        name: 'Peak Experience',
-        duration: 70,
-        frequency: 14,   // TODO: Low beta - intense
-        pattern: PATTERNS.VORTEX,
-        intensity: 1.0,  // TODO: GUARDRAIL REMOVED - maximum
-        jitter: 0.35
-      }),
-      createPhase({
-        name: 'Comedown',
-        duration: 40,
-        frequency: 9,
-        pattern: PATTERNS.CONCENTRIC,
-        intensity: 0.7
-      }),
-      createPhase({
-        name: 'Rest',
-        duration: 35,
-        frequency: 7,
-        pattern: PATTERNS.UNIFORM,
-        rampOut: 12,
-        intensity: 0.4
-      })
-    ]
-  },
-  // NEW: Extreme experience pack
-  {
-    id: 'overdrive',
-    name: 'Overdrive',
-    description: 'Maximum intensity experience. No guardrails. You have been warned.',
-    duration: 240,
-    difficulty: 'advanced',
-    icon: '🔥',
     color: 'from-orange-600 to-red-700',
     phases: [
       createPhase({
-        name: 'Ignition',
-        duration: 20,
+        name: 'Rapid Onset',
+        duration: 25,
         frequency: 10,
         pattern: PATTERNS.UNIFORM,
-        rampIn: 3,
-        intensity: 0.8
+        rampIn: 4,        // Faster onset for experienced users
+        intensity: 0.9,
+        description: 'Quick entrainment'
       }),
       createPhase({
-        name: 'Accelerate',
-        duration: 30,
-        frequency: 12,
-        pattern: PATTERNS.STARBURST,
-        intensity: 1.0,
-        jitter: 0.2
-      }),
-      createPhase({
-        name: 'Overdrive',
-        duration: 60,
-        frequency: 14,   // TODO: Beta range for intensity
-        pattern: PATTERNS.VORTEX,
-        intensity: 1.0,
-        jitter: 0.4
-      }),
-      createPhase({
-        name: 'Hyperdrive',
+        name: 'High Alpha',
         duration: 50,
-        frequency: 13,
-        pattern: PATTERNS.TUNNEL,
+        frequency: 12,    // High alpha - intense patterns
+        pattern: PATTERNS.UNIFORM,
         intensity: 1.0,
-        jitter: 0.5      // TODO: Maximum jitter for chaos
+        jitter: 0.2,
+        description: 'Full intensity alpha'
       }),
       createPhase({
-        name: 'Strobe',
-        duration: 40,
-        frequency: 15,   // TODO: Edge of danger zone
-        pattern: PATTERNS.CHECKERBOARD,
+        name: 'Alpha-Beta Edge',
+        duration: 70,
+        frequency: 13,    // Alpha-beta boundary - maximum safe
+        pattern: PATTERNS.UNIFORM,
         intensity: 1.0,
-        rampIn: 0,       // TODO: GUARDRAIL REMOVED - instant transition
-        jitter: 0.3
+        jitter: 0.3,
+        description: 'Peak intensity experience'
+      }),
+      createPhase({
+        name: 'Sustained Peak',
+        duration: 60,
+        frequency: 12,
+        pattern: PATTERNS.UNIFORM,
+        intensity: 1.0,
+        jitter: 0.25,
+        description: 'Maintain peak state'
+      }),
+      createPhase({
+        name: 'Berger Return',
+        duration: 45,
+        frequency: 10,    // Return to optimal
+        pattern: PATTERNS.UNIFORM,
+        intensity: 0.85,
+        description: 'Return to core frequency'
       }),
       createPhase({
         name: 'Cooldown',
-        duration: 40,
+        duration: 50,
         frequency: 8,
-        pattern: PATTERNS.CONCENTRIC,
+        pattern: PATTERNS.UNIFORM,
         rampOut: 15,
-        intensity: 0.5
+        intensity: 0.5,
+        description: 'Gradual emergence'
       })
     ]
   }

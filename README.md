@@ -26,18 +26,17 @@ A React-based photic stimulation app that uses rhythmic light patterns (4-15 Hz)
 
 ## Overview
 
-Flicker uses the "flicker frequency response" phenomenon where alpha/theta frequencies (8-13 Hz) produce visual hallucinations with eyes closed. The app generates complex waveforms with harmonics for smooth, organic flicker patterns across 8 different visual designs.
+Flicker uses the "flicker frequency response" phenomenon where alpha/theta frequencies (8-13 Hz) produce visual hallucinations with eyes closed. The app uses a **native strobe engine** to control your phone's flashlight with precise timing for high-performance light modulation.
 
 ## Features
 
+- **Flashlight Control**: Uses phone's flashlight for precise flicker stimulation
 - **Experience Packs**: Curated sessions with multiple phases
   - Beginner, Intermediate, and Advanced difficulty levels
   - Pre-designed frequency progressions
   - Random mode for exploration
-- **8 Visual Patterns**: Uniform, Radial, Spiral, Tunnel, Checkerboard, Concentric, Starburst, Vortex
 - **Phase Transitions**: Smooth ramp-in/ramp-out between frequencies
 - **Session Controls**: Tap to pause, double-tap to exit
-- **Session Reviews**: Rate and track your experiences
 - **Safety First**: Built-in frequency limits and seizure warnings
 
 ## Safety Constraints ⚠️
@@ -60,8 +59,8 @@ Flicker uses the "flicker frequency response" phenomenon where alpha/theta frequ
 - **React 19** - UI framework
 - **Vite 7** - Build tool and dev server
 - **Capacitor 7** - Native Android wrapper
+- **Custom FlashlightPlugin** - Native strobe engine (queue-based effects)
 - **Tailwind CSS 4** - Styling (dark theme)
-- **Canvas API** - High-performance rendering
 - **Vitest** - Testing framework
 
 ## Getting Started
@@ -118,10 +117,9 @@ Build.bat
 ```
 src/
 ├── components/          # React components
-│   ├── SessionPlayer.jsx      # Core flicker engine
+│   ├── SessionPlayer.jsx      # Core session engine (native strobe control)
 │   ├── PackSelection.jsx      # Experience pack chooser
 │   ├── PackPreview.jsx        # Session preview with graphs
-│   ├── SessionReview.jsx      # Post-session feedback
 │   ├── SeizureWarning.jsx     # Safety warning screen
 │   ├── SplashScreen.jsx       # App intro
 │   └── preview/               # Preview subcomponents
@@ -132,23 +130,16 @@ src/
 │   └── frequencies.js        # Frequency bands & limits
 │
 ├── hooks/               # Custom React hooks
-│   ├── useSessionTimer.js    # Timer management
-│   ├── usePhaseCalculation.js # Phase transitions
-│   ├── useCanvas.js          # Canvas utilities
 │   └── useUITimeout.js       # Auto-hide UI
 │
 ├── utils/               # Pure utility functions
-│   ├── intensity.js          # Intensity calculation
 │   ├── easing.js             # Easing functions
 │   ├── format.js             # String formatting
 │   └── math.js               # Math utilities
 │
-├── renderer/            # Canvas rendering
-│   └── patternRenderer.js    # Pattern drawing logic
-│
 ├── services/            # Business logic
-│   ├── reviewStorage.js      # Session history
-│   └── warningStorage.js     # Warning acceptance
+│   ├── warningStorage.js     # Warning acceptance
+│   └── flashlightService.js  # Native strobe engine wrapper
 │
 ├── packs.js             # Experience pack definitions
 └── App.jsx              # Main app & state machine
@@ -157,7 +148,7 @@ src/
 ## Screen Flow
 
 ```
-SPLASH → WARNING → PACKS → PREVIEW → SESSION → REVIEW → (loop)
+SPLASH → WARNING → PACKS → PREVIEW → SESSION → (loop back to PACKS)
 ```
 
 Simple `useState` manages navigation - no Redux/Context needed.
@@ -179,17 +170,6 @@ createPhase({
 })
 ```
 
-## Intensity Calculation
-
-The app generates complex waveforms for organic flicker:
-
-1. Primary sine wave at target frequency
-2. Second harmonic (2x frequency) at 30% amplitude  
-3. Sub-harmonic (0.5x frequency) at 20% amplitude
-4. Normalize to 0-1 range
-5. Apply power curve (1.8) for sharper transitions
-6. Apply phase intensity and ramp modulation
-
 ## Testing
 
 ```bash
@@ -200,28 +180,50 @@ npm test
 npm test -- --watch
 ```
 
+## How It Works
+
+The app uses a **native strobe engine** to control your phone's flashlight:
+
+1. **Phase Conversion**: Pack phases are converted to strobe effects with frequency/duration/intensity
+2. **Queue Upload**: All effects are uploaded to the native engine via `enqueueAll()`
+3. **Native Timing**: Android native code handles precise strobe timing (not JS)
+4. **Event System**: JS receives `queueEmpty`, `stateChanged`, `error` events for UI updates
+5. **Pause/Resume**: Native engine maintains precise timing state across pause/resume
+
+### Session Workflow
+```javascript
+await flashlightService.initialize();    // Check availability
+await flashlightService.clearQueue();    // Clear existing effects
+await flashlightService.enqueueAll(effects);  // Upload phase effects
+await flashlightService.start();         // Begin playback
+await flashlightService.cleanup();       // Ensure flash off on exit
+```
+
+The native plugin is located at `android/app/src/main/java/com/flicker/neural/plugins/FlashlightPlugin.java`.
+
 ## Common Issues
 
-1. **Capacitor sync**: After web edits, MUST run `npx cap sync`
-2. **Frequency limits**: Never exceed 15 Hz
-3. **Canvas performance**: Avoid heavy calculations in 60fps draw loops
-4. **Ramp times**: Always use ≥3s rampIn/rampOut
-5. **Android testing**: Real device required - emulator won't show accurate flicker
+1. **Capacitor sync**: After web edits, MUST run `npx cap sync` before Android testing
+2. **Frequency limits**: Never exceed 15 Hz (epilepsy risk)
+3. **Flashlight availability**: App requires working flashlight - gracefully handles unavailable devices
+4. **Ramp times**: Always use ≥3s rampIn/rampOut to prevent sudden flashes
+5. **Android testing**: Real device required - emulator has no flashlight
+6. **Cleanup**: Always call `flashlightService.cleanup()` on session exit to ensure flash is off
 
 ## Development Notes
 
-- **TODO comments** document design decisions - don't remove them
+- **TODO comments** document safety decisions and design evolution - don't remove them
 - Tailwind uses dark theme (`bg-gray-900`, `text-white`)
 - Pure React hooks - no global state library needed
-- LocalStorage for session history
-- Inline styles for dynamic canvas animations
+- Barrel exports in each folder (`index.js`) for clean imports
+- Native strobe engine handles all flash timing - JS only updates UI
 
 ## Contributing
 
 This is a personal project focused on neural entrainment and visual phenomena. Contributions should prioritize:
 
-1. **Safety first** - maintain frequency limits and warning systems
-2. **Performance** - canvas rendering must stay at 60fps
+1. **Safety first** - maintain frequency limits (≤15 Hz) and warning systems
+2. **Native engine reliability** - ensure proper cleanup and error handling
 3. **User experience** - smooth transitions and intuitive controls
 
 ## License

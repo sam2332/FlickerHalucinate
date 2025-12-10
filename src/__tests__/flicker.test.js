@@ -3,7 +3,8 @@
  * 
  * Run with: npm test
  * 
- * These tests verify the core calculations and guardrail documentation
+ * These tests verify the core calculations and document Dreamachine research
+ * Based on Brion Gysin's 1959 Dreamachine and subsequent neuroscience studies
  */
 
 import { describe, it, expect } from 'vitest';
@@ -17,24 +18,37 @@ import {
   getInterpolatedFrequency
 } from '../packs';
 
-describe('Frequency Bands', () => {
-  it('should cover full EEG spectrum', () => {
-    // TODO: GUARDRAIL - These are the scientifically recognized brainwave bands
-    expect(FREQUENCY_BANDS.DELTA.min).toBe(0.5);  // Deep sleep
-    expect(FREQUENCY_BANDS.DELTA.max).toBe(4);
-    expect(FREQUENCY_BANDS.THETA.min).toBe(4);    // Meditation
-    expect(FREQUENCY_BANDS.THETA.max).toBe(8);
-    expect(FREQUENCY_BANDS.ALPHA_LOW.min).toBe(8); // Most effective for photic driving
+describe('Frequency Bands (Dreamachine Research)', () => {
+  it('should define alpha range as 8-13 Hz (Dreamachine optimal)', () => {
+    // The Dreamachine was designed to flicker at 8-13 Hz
+    // This is the alpha brainwave band where photic driving is strongest
+    expect(FREQUENCY_BANDS.ALPHA_LOW.min).toBe(8);
     expect(FREQUENCY_BANDS.ALPHA_HIGH.max).toBe(13);
-    expect(FREQUENCY_BANDS.BETA_LOW.min).toBe(13); // Active thinking
-    expect(FREQUENCY_BANDS.BETA_HIGH.max).toBe(30);
-    expect(FREQUENCY_BANDS.GAMMA.min).toBe(30);   // High cognition
   });
 
-  it('should have no gaps between bands', () => {
+  it('should identify 10 Hz as the Berger frequency', () => {
+    // Hans Berger discovered the ~10 Hz alpha rhythm in 1929
+    // This is the dominant frequency of relaxed, eyes-closed wakefulness
+    expect(FREQUENCY_BANDS.ALPHA_MID.min).toBe(10);
+    expect(FREQUENCY_BANDS.ALPHA_MID.name).toBe('Berger Frequency');
+  });
+
+  it('should define theta range as 4-8 Hz (hypnagogic states)', () => {
+    // Theta frequencies induce drowsiness and hypnagogic imagery
+    expect(FREQUENCY_BANDS.THETA.min).toBe(4);
+    expect(FREQUENCY_BANDS.THETA.max).toBe(8);
+  });
+
+  it('should mark 15-25 Hz as danger zone', () => {
+    // 15-25 Hz is the photosensitive epilepsy trigger range
+    expect(FREQUENCY_BANDS.BETA_HIGH.min).toBe(15);
+    expect(FREQUENCY_BANDS.BETA_HIGH.max).toBe(25);
+    expect(FREQUENCY_BANDS.BETA_HIGH.name).toBe('DANGER ZONE');
+  });
+
+  it('should have continuous coverage from delta to beta', () => {
     expect(FREQUENCY_BANDS.DELTA.max).toBe(FREQUENCY_BANDS.THETA.min);
     expect(FREQUENCY_BANDS.THETA.max).toBe(FREQUENCY_BANDS.ALPHA_LOW.min);
-    // Note: There's intentional overlap in alpha for flexibility
   });
 });
 
@@ -50,37 +64,65 @@ describe('Patterns', () => {
     expect(PATTERNS.STARBURST).toBeDefined();
     expect(PATTERNS.VORTEX).toBeDefined();
   });
+
+  it('should use UNIFORM for authentic Dreamachine experience', () => {
+    // Original Dreamachine used uniform field (Ganzfeld effect)
+    // Non-uniform patterns are visual enhancements, not authentic
+    const classicPack = EXPERIENCE_PACKS.find(p => p.id === 'classic-dreamachine');
+    expect(classicPack).toBeDefined();
+    
+    // All phases should use UNIFORM for authentic experience
+    classicPack.phases.forEach(phase => {
+      expect(phase.pattern).toBe(PATTERNS.UNIFORM);
+    });
+  });
 });
 
-describe('Experience Packs', () => {
-  it('should have at least 6 packs', () => {
+describe('Experience Packs (Dreamachine-Based)', () => {
+  it('should have at least 6 packs covering different use cases', () => {
     expect(EXPERIENCE_PACKS.length).toBeGreaterThanOrEqual(6);
   });
 
-  it('should include an "Overdrive" pack with full intensity', () => {
-    const overdrive = EXPERIENCE_PACKS.find(p => p.id === 'overdrive');
-    expect(overdrive).toBeDefined();
+  it('should include a Classic Dreamachine pack at 10 Hz', () => {
+    const classic = EXPERIENCE_PACKS.find(p => p.id === 'classic-dreamachine');
+    expect(classic).toBeDefined();
+    expect(classic.difficulty).toBe('beginner');
     
-    // TODO: GUARDRAIL REMOVED - Overdrive should hit 1.0 intensity
-    const maxIntensity = Math.max(...overdrive.phases.map(p => p.intensity));
-    expect(maxIntensity).toBe(1.0);
+    // Should have a phase at the Berger frequency (10 Hz)
+    const bergerPhase = classic.phases.find(p => p.frequency === 10);
+    expect(bergerPhase).toBeDefined();
   });
 
-  it('all packs should have valid frequencies', () => {
+  it('should have theta-based pack for hypnagogic states', () => {
+    // Theta (4-8 Hz) induces drowsiness and dream-like imagery
+    const thetaPacks = EXPERIENCE_PACKS.filter(p => 
+      p.phases.some(phase => phase.frequency >= 4 && phase.frequency < 8)
+    );
+    expect(thetaPacks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('all packs should stay within safe frequency range (4-14 Hz)', () => {
+    // Based on research: below 4 Hz is imperceptible, above 14 Hz approaches danger zone
     EXPERIENCE_PACKS.forEach(pack => {
       pack.phases.forEach(phase => {
-        // TODO: GUARDRAIL - Frequency should be in usable range (0.5 - 60 Hz)
-        // Below 0.5 Hz is imperceptible, above 60 Hz exceeds most display refresh
-        expect(phase.frequency).toBeGreaterThanOrEqual(0.5);
-        expect(phase.frequency).toBeLessThanOrEqual(60);
+        expect(phase.frequency).toBeGreaterThanOrEqual(4);
+        expect(phase.frequency).toBeLessThanOrEqual(14);
       });
     });
   });
 
-  it('all packs should have valid intensities', () => {
+  it('no pack should enter the 15-25 Hz seizure danger zone', () => {
+    // CRITICAL SAFETY: 15-25 Hz triggers photosensitive epilepsy
     EXPERIENCE_PACKS.forEach(pack => {
       pack.phases.forEach(phase => {
-        // TODO: GUARDRAIL - Intensity should be 0-1 (0% to 100%)
+        expect(phase.frequency).toBeLessThan(15);
+      });
+    });
+  });
+
+  it('all packs should have valid intensities (0-1)', () => {
+    EXPERIENCE_PACKS.forEach(pack => {
+      pack.phases.forEach(phase => {
         expect(phase.intensity).toBeGreaterThanOrEqual(0);
         expect(phase.intensity).toBeLessThanOrEqual(1);
       });
@@ -92,22 +134,29 @@ describe('Experience Packs', () => {
     
     advancedPacks.forEach(pack => {
       const maxIntensity = Math.max(...pack.phases.map(p => p.intensity));
-      // TODO: GUARDRAIL REMOVED - Advanced packs should not cap intensity
       expect(maxIntensity).toBe(1.0);
     });
   });
 
-  it('should have packs covering theta to beta frequency ranges', () => {
-    const allFrequencies = EXPERIENCE_PACKS.flatMap(p => p.phases.map(ph => ph.frequency));
-    const minFreq = Math.min(...allFrequencies);
-    const maxFreq = Math.max(...allFrequencies);
+  it('beginner packs should have slower onset (rampIn >= 6)', () => {
+    const beginnerPacks = EXPERIENCE_PACKS.filter(p => p.difficulty === 'beginner');
     
-    // Should go down to theta (around 5-6 Hz)
-    expect(minFreq).toBeLessThanOrEqual(6);
-    
-    // Should go up to low beta (around 14-15 Hz)
-    // TODO: GUARDRAIL - staying below 16 Hz to avoid seizure trigger zone
-    expect(maxFreq).toBeGreaterThanOrEqual(14);
+    beginnerPacks.forEach(pack => {
+      // First phase should have slow onset for safety
+      expect(pack.phases[0].rampIn).toBeGreaterThanOrEqual(6);
+    });
+  });
+
+  it('all packs should center around alpha range (8-13 Hz)', () => {
+    // Dreamachine research shows alpha is optimal for visual entrainment
+    EXPERIENCE_PACKS.forEach(pack => {
+      const frequencies = pack.phases.map(p => p.frequency);
+      const avgFreq = frequencies.reduce((a, b) => a + b, 0) / frequencies.length;
+      
+      // Average frequency should be in or near alpha range
+      expect(avgFreq).toBeGreaterThanOrEqual(6);
+      expect(avgFreq).toBeLessThanOrEqual(12);
+    });
   });
 });
 
@@ -171,107 +220,140 @@ describe('Phase Calculations', () => {
 });
 
 describe('Intensity Calculation Verification', () => {
-  // These values document what the intensity calculation SHOULD produce
-  // with guardrails removed
-  
-  it('documents intensity formula', () => {
-    // The intensity formula without guardrails:
-    // 1. Primary sine wave at target frequency
-    // 2. Add 30% 2nd harmonic (double freq)
-    // 3. Add 20% sub-harmonic (half freq)
-    // 4. Normalize combined wave to 0-1
-    // 5. Apply power curve (1.8) for sharpening
-    // 6. Multiply by phase intensity (0-1)
-    // 7. Apply ramp in/out multipliers
-    
-    // TODO: GUARDRAIL REMOVED - Old formula:
-    // return 0.15 + (curved * 0.75 * intensityMultiplier);
-    // This capped output to 0.15-0.90 range
-    
-    // TODO: GUARDRAIL REMOVED - New formula:
-    // return curved * intensityMultiplier;
-    // This allows full 0.0-1.0 range
+  it('documents intensity formula for flashlight control', () => {
+    // Flashlight-based intensity (digital on/off):
+    // 1. Native Java engine receives strobe frequency
+    // 2. Half-period calculated: (1000 / frequency) / 2 ms
+    // 3. Flashlight toggles on/off at half-period intervals
+    // 4. Creates square wave approximation of sine wave
+    //
+    // For 10 Hz: half-period = 50ms (100ms full cycle)
+    // Flash is ON for 50ms, OFF for 50ms = 10 cycles/second
     
     expect(true).toBe(true); // Documentation test
   });
 
-  it('documents flicker frequency meaning', () => {
-    // TODO: These frequencies have specific neurological effects:
+  it('documents Dreamachine frequency effects', () => {
+    // DREAMACHINE RESEARCH - Frequency-specific phenomena:
     
-    // 4-6 Hz (Theta): Deep meditation, drowsiness, hypnagogic states
-    // - Best for: relaxation, creativity, sleep transition
+    // 4-5 Hz (Low Theta): 
+    // - Near sleep threshold
+    // - Slow, flowing imagery
+    // - Best for: sleep induction, deep meditation
     
-    // 7-8 Hz (Theta-Alpha border): Light meditation
-    // - Best for: relaxation, reduced anxiety
+    // 5-7 Hz (Mid Theta):
+    // - Hypnagogic imagery (faces, landscapes)
+    // - Dream-like experiences
+    // - Best for: creativity, lucid dream prep
     
-    // 8-10 Hz (Low Alpha): Relaxed wakefulness, eyes closed
-    // - Best for: calm focus, light entrainment
+    // 7-8 Hz (High Theta / Alpha border):
+    // - Transition zone
+    // - Relaxed but aware
+    // - Best for: light meditation
     
-    // 10-12 Hz (High Alpha): Alert relaxation
-    // - Best for: strong visual entrainment, pattern perception
-    // - This is the MOST EFFECTIVE range for photic driving
+    // 8-10 Hz (Low Alpha):
+    // - Classic Dreamachine zone
+    // - Mandala-like patterns
+    // - Best for: visual entrainment
     
-    // 12-15 Hz (SMR/Low Beta): Focused attention
-    // - Best for: concentration, sensorimotor rhythm training
+    // 10 Hz (Berger Frequency):
+    // - THE OPTIMAL FREQUENCY
+    // - Strongest photic driving response
+    // - Vivid geometric hallucinations
+    // - This is what the Dreamachine was designed for
     
-    // 15-25 Hz: CAUTION - Seizure trigger zone
-    // - Photosensitive epilepsy can be triggered here
+    // 10-12 Hz (Mid Alpha):
+    // - Intense geometric patterns
+    // - Color phenomena (phosphenes)
+    // - Best for: strong visual experience
     
-    // 25-40 Hz (Beta-Gamma): High cognition
-    // - Best for: problem solving, peak performance
-    // - Harder to perceive visually due to flicker fusion
+    // 12-13 Hz (High Alpha):
+    // - Rapid, complex patterns
+    // - Alert but relaxed
+    // - Best for: short, intense sessions
+    
+    // 13-14 Hz (Alpha-Beta border):
+    // - Approaching active thinking
+    // - Less visual, more alert
+    // - CAUTION: getting close to danger zone
+    
+    // 15-25 Hz: NEVER USE - Seizure trigger range
     
     expect(true).toBe(true); // Documentation test
   });
 
-  it('documents jitter parameter', () => {
-    // TODO: Jitter adds random variation to frequency
-    // jitter: 0.0 = exact frequency, no variation
-    // jitter: 0.1 = ±0.05 Hz variation
-    // jitter: 0.5 = ±0.25 Hz variation (chaotic feel)
-    // jitter: 1.0 = ±0.5 Hz variation (maximum chaos)
-    
-    // Jitter prevents habituation - the brain adapts less to unpredictable stimuli
+  it('documents jitter parameter for organic feel', () => {
+    // Jitter adds random frequency variation each flash cycle
+    // Prevents habituation - brain adapts less to unpredictable stimuli
+    //
+    // jitter: 0.0 = exact frequency, machine-like precision
+    // jitter: 0.1 = ±0.05 Hz variation, subtle organic feel
+    // jitter: 0.2 = ±0.1 Hz variation, natural variation
+    // jitter: 0.3 = ±0.15 Hz variation, noticeable drift
+    //
+    // Original Dreamachine had natural jitter from turntable speed variation
     
     expect(true).toBe(true); // Documentation test
   });
 });
 
-describe('Safety Notes (Documentation)', () => {
-  it('documents what is NOT enforced', () => {
-    // TODO: The following guardrails have been REMOVED:
+describe('Safety Documentation (Dreamachine Research)', () => {
+  it('documents Dreamachine safety principles', () => {
+    // BRION GYSIN DREAMACHINE SAFETY (1959):
+    // 1. Use with EYES CLOSED - light passes through eyelids
+    // 2. Uniform light field (Ganzfeld) is essential
+    // 3. 8-13 Hz is the safe, effective range
+    // 4. Sessions should have gradual onset and offset
+    // 5. User should be able to stop at any time
     
-    // 1. Intensity floor (was 0.15, now 0.0)
-    //    - Full black is now possible
-    //    - More dramatic contrast
-    
-    // 2. Intensity ceiling (was 0.75 * multiplier, now 1.0)
-    //    - Full white is now possible
-    //    - Maximum contrast ratio
-    
-    // 3. Ramp-out reduction (was 30% reduction, now 100%)
-    //    - Phases can fully fade out
-    //    - More dramatic transitions
-    
-    // 4. Frequency range (was 6-12 Hz, now 0.5-60 Hz)
-    //    - Full spectrum now available
-    //    - User assumes responsibility
-    
-    // 5. Default intensity (was 0.85, now 1.0)
-    //    - New phases default to full power
+    // MODERN SAFETY ADDITIONS:
+    // 1. Seizure warning must be acknowledged
+    // 2. Never exceed 14 Hz (approaching danger zone)
+    // 3. NEVER use 15-25 Hz (photosensitive epilepsy trigger)
+    // 4. Minimum 3s ramp in/out to prevent sudden onset
+    // 5. Tap to pause, double-tap to exit always available
     
     expect(true).toBe(true); // Documentation test
   });
 
-  it('documents what IS still enforced', () => {
-    // TODO: The following safety measures remain:
+  it('documents what IS enforced for safety', () => {
+    // ENFORCED SAFETY MEASURES:
+    // 1. Seizure warning screen must be acknowledged before first use
+    // 2. All packs stay within 4-14 Hz range
+    // 3. No pack enters 15-25 Hz danger zone
+    // 4. Minimum rampIn/rampOut of 3 seconds
+    // 5. Tap to pause functionality always available
+    // 6. Double-tap to exit always available
+    // 7. ESC key always exits (desktop testing)
+    // 8. Session has defined end (not infinite)
+    // 9. Flashlight turns off on session end/exit
+    // 10. Gradual fade out on exit (not instant stop)
     
-    // 1. Seizure warning screen must be acknowledged
-    // 2. Tap to pause functionality always available
-    // 3. Double-tap to exit always available
-    // 4. ESC key always exits
-    // 5. Session has defined end (not infinite)
-    // 6. Fade out on exit (gradual, not instant)
+    expect(true).toBe(true); // Documentation test
+  });
+
+  it('documents historical Dreamachine research', () => {
+    // DREAMACHINE HISTORY:
+    //
+    // 1959: Brion Gysin and Ian Sommerville create Dreamachine
+    // - 78 RPM turntable with slotted cylinder
+    // - 100W bulb inside cylinder
+    // - Produces 8-13 Hz flicker through slots
+    // - User sits with closed eyes facing light
+    //
+    // 1960s: William S. Burroughs experiments with Dreamachine
+    // - Documents "elaborate color visions"
+    // - Notes similarity to psychedelic experiences
+    //
+    // 1970s-2000s: EEG studies confirm photic driving
+    // - Alpha entrainment strongest at 10 Hz
+    // - Closed eyes essential (light through eyelids)
+    // - 15-25 Hz identified as seizure trigger range
+    //
+    // 2010s-present: Digital Dreamachine implementations
+    // - LED/screen-based versions
+    // - Smartphone flashlight implementations
+    // - Same principles apply: 8-13 Hz, eyes closed, uniform field
     
     expect(true).toBe(true); // Documentation test
   });
